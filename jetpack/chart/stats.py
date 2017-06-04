@@ -108,7 +108,7 @@ def paired_scatter(data, labels=None, axes=None, categories=None,
         # set the colors for the scatterplots
         catset = np.array(list(set(categories)))
         cols = [col for col, cg in zip(color_cycle, catset)]
-        sc_kw["c"] = [cols[np.where(catset==cg)[0]] for cg in categories]
+        sc_kw["c"] = [cols[np.argwhere(catset==cg)[0,0]] for cg in categories]
         h_kw["color"] = cols
     else:
         # black scatterpoints by default

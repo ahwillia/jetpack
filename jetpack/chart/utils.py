@@ -10,9 +10,9 @@ from matplotlib.colors import LinearSegmentedColormap, colorConverter
 from matplotlib.cm import get_cmap
 import matplotlib
 
-__all__ = ['setfontsize', 'noticks', 'nospines', 'breathe', 'setcolor', 'get_bounds',
-           'tickdir', 'minimal_xticks', 'minimal_yticks', 'categories_to_colors',
-           'simple_cmap', 'discretize_cmap']
+__all__ = ['setfontsize', 'noticks', 'nospines', 'noclips', 'breathe', 'setcolor',
+           'get_bounds', 'tickdir', 'minimal_xticks', 'minimal_yticks',
+           'categories_to_colors', 'simple_cmap', 'discretize_cmap']
 
 def plotwrapper(fun):
     """
@@ -254,6 +254,10 @@ def setcolor(color='#444444', **kwargs):
 
     return ax
 
+def noclips(fig):
+    [o.set_clip_on(False) for o in fig.findobj()]
+    return fig
+
 def categories_to_colors(data, color_cycle=None):
     """Map categorical data to a color palette.
 
@@ -280,12 +284,17 @@ def categories_to_colors(data, color_cycle=None):
                         (0.64, 0.64, 0.64),
                         (0.80, 0.8, 0.36),
                         (0.43, 0.8, 0.85)]
+    elif not isinstance(color_cycle, list):
+        try:
+            color_cycle = list(color_cycle)
+        except:
+            raise ValueError('color_cycle should be specified as a list.')
 
     # list of unique values in the data vector
     categories = np.sort(np.array(list(set(data))))
 
-    if len(categories) > len(color_cycle):
-        raise ValueError('more categories than colors')
+    while len(categories) > len(color_cycle):
+        color_cycle += color_cycle
 
     cat_to_col = {level: color for color, level in zip(color_cycle, categories)}
     return [cat_to_col[item] for item in data]
@@ -329,3 +338,56 @@ def discretize_cmap(cmap, n=100):
         raise ValueError('Colormap not recognized.')
 
     return [cmap(x) for x in np.linspace(0, 1, n)]
+
+def auto_subplot_layout(n, tol=2.5):
+    """Calculate roughly square layout for subplots
+    """
+    
+    def _primes(n):
+        """Computes the prime factorization for an integer
+        """
+        pfac = [] # prime factors
+        d = 2
+        while d*d <= n:
+            while (n % d) == 0:
+                pfac.append(d)
+                n //= d
+            d += 1
+        if n > 1:
+            pfac.append(n)
+        return pfac
+    
+    def _isprime(n):
+        """Returns whether an integer is prime or not.
+        """
+        return all([ n % d != 0 for d in range(2, n//2+1)])
+
+    if not isinstance(n, int) or n <= 0:
+        raise ValueError('number of subplots must be specified as a positive integer')
+
+    if n == 1:
+        return (1, 1)
+    
+    while _isprime(n) and n > 4:
+        n = n+1
+
+    p = _primes(n)
+
+    # single row of plots
+    if len(p) == 1:
+        return 1, p[0]
+
+    while len(p) > 2:
+        if len(p) >= 4:
+            p[1] = p[1]*p.pop()
+            p[0] = p[0]*p.pop()
+        else:
+            # len(p) == 3
+            p[0] = p[0]*p[1]
+            p.pop(1)
+        p = np.sort(p)
+
+    if p[1]/p[0] > tol:
+        return auto_subplot_layout(n+1, tol=tol)
+    else:
+        return p[0], p[1]

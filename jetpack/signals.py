@@ -13,7 +13,7 @@ from scipy.ndimage.filters import gaussian_filter1d
 from scipy.linalg import sqrtm, inv
 
 __all__ = ['peakdet', 'smooth', 'moving_average', 'norms', 'sfthr', 'sfrct', 'sq', 'arr',
-           'whiten', 'canoncorr', 'xcorr', 'sqa']
+           'whiten', 'stable_rank', 'canoncorr', 'xcorr', 'sqa']
 
 
 def peakdet(v, delta, x=None):
