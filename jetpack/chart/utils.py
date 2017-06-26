@@ -122,55 +122,52 @@ def nospines(left=False, bottom=False, top=True, right=True, **kwargs):
     return ax
 
 @axwrapper
-def minimal_xticks(decimals=None, n_ticks=4, pad=True, **kwargs):
+def minimal_ticks(**kwargs):
+    """
+    Label only the first and last tick marks on x and y axes.
+    """
+    minimal_xticks(**kwargs)
+    minimal_yticks(**kwargs)
+    return kwargs['ax']
+
+@axwrapper
+def minimal_xticks(decimals=None, n_ticks=2, reset_bounds=True, **kwargs):
     """
     Label only the first and last tick marks on the x axis.
     """
     ax = kwargs['ax']
 
-    # get first and last tick
-    t0, t1 = ax.get_xlim()
+    ticks = ax.get_xticks()
+    xl = ax.get_xlim()
+    t0 = np.min(ticks[ticks > xl[0]])
+    t1 = np.max(ticks[ticks < xl[1]])
 
-    # round limits
-    if decimals == 0:
-        t0, t1 = int(t0), int(t1)
-    elif decimals is not None:
-        padding = 10**(-decimals) if pad else 0.0
-        t0 = np.round(t0, decimals=decimals) - padding
-        t1 = np.round(t1, decimals=decimals) + padding
+    ax.set_xticks(np.linspace(t0, t1, n_ticks))
 
-    # reset tick marks
-    ticks = np.linspace(t0, t1, n_ticks)
-
-    # update plot
-    ax.set_xticks(ticks)
-    ax.set_xticklabels([str(t0), *['' for _ in range(len(ticks)-2)], str(t1)])
+    if reset_bounds:
+        ax.spines['top'].set_bounds(t0, t1)
+        ax.spines['bottom'].set_bounds(t0, t1)
 
     return ax
 
 @axwrapper
-def minimal_yticks(decimals=None, n_ticks=4, pad=True, **kwargs):
+def minimal_yticks(decimals=None, n_ticks=2, reset_bounds=True, **kwargs):
     """
-    Label only the first and last tick marks.
+    Label only the first and last tick marks on the y axis.
     """
     ax = kwargs['ax']
 
     # get first and last tick
-    t0, t1 = ax.get_ylim()
+    ticks = ax.get_yticks()
+    yl = ax.get_ylim()
+    t0 = np.min(ticks[ticks > yl[0]])
+    t1 = np.max(ticks[ticks < yl[1]])
 
-    if decimals == 0:
-        t0, t1 = int(t0), int(t1)
-    elif decimals is not None:
-        padding = 10**(-decimals) if pad else 0.0
-        t0 = np.round(t0, decimals=decimals) - padding
-        t1 = np.round(t1, decimals=decimals) + padding
+    ax.set_yticks(np.linspace(t0, t1, n_ticks))
 
-    # reset tick marks
-    ticks = np.linspace(t0, t1, n_ticks)
-
-    # update plot
-    ax.set_yticks(ticks)
-    ax.set_yticklabels([str(t0), *['' for _ in range(len(ticks)-2)], str(t1)])
+    if reset_bounds:
+        ax.spines['right'].set_bounds(t0, t1)
+        ax.spines['left'].set_bounds(t0, t1)
     
     return ax
 
