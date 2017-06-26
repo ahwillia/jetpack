@@ -11,7 +11,7 @@ from matplotlib.cm import get_cmap
 import matplotlib
 
 __all__ = ['setfontsize', 'noticks', 'nospines', 'noclips', 'breathe', 'setcolor',
-           'get_bounds', 'tickdir', 'minimal_xticks', 'minimal_yticks',
+           'get_bounds', 'tickdir', 'minimal_ticks', 'minimal_xticks', 'minimal_yticks',
            'categories_to_colors', 'simple_cmap', 'discretize_cmap']
 
 def plotwrapper(fun):
