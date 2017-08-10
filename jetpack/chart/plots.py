@@ -8,7 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import animation
 
-__all__ = ['hist', 'hist2d', 'errorplot', 'img', 'play', 'corrplot', 'imv', 'bars', 'colorbar']
+__all__ = ['hist', 'hist2d', 'errorplot', 'img', 'play', 'corrplot', 'imv', 'bars', 'colorbar', 'fitline']
 
 
 @plotwrapper
@@ -271,6 +271,17 @@ def bars(labels, data, color='#444444', width=0.7, err=None, ecolor='#111111',
     ax.set_xticklabels(labels)
     tickdir('out', ax=ax)
 
+    return ax
+
+
+@plotwrapper
+def fitline(x, y, **kwargs):
+    """Plots a best fit line to the data
+    """
+    fig, ax = kwargs.pop('fig'), kwargs.pop('ax')
+    f = np.poly1d(np.polyfit(x.ravel(), y.ravel(), 1))
+    x_ = np.unique(x.ravel())
+    ax.plot(x_, f(x_), **kwargs)
     return ax
 
 
