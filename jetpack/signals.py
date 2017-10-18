@@ -220,10 +220,11 @@ def norms(x, order=2):
 
 
 def stable_rank(X):
-    """Computes the stable rank of a matrix"""
+    """Computes participation ratio of a matrix.
+    """
     assert X.ndim == 2, "X must be a matrix"
-    svals_sq = np.linalg.svd(X, compute_uv=False, full_matrices=False) ** 2
-    return svals_sq.sum() / svals_sq.max()
+    lam = np.linalg.svd(X, compute_uv=False, full_matrices=False) ** 2
+    return np.sum(lam)**2 / np.sum(lam**2)
 
 
 def canoncorr(X, Y):
