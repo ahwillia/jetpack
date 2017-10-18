@@ -5,6 +5,7 @@ Plots
 from .utils import plotwrapper, noticks, tickdir, setfontsize
 from functools import partial
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib import animation
 
@@ -241,37 +242,75 @@ def corrplot(C, cmap=None, cmap_range=(0.0, 1.0), cbar=True, fontsize=14, **kwar
 
 
 @plotwrapper
-def bars(labels, data, color='#444444', width=0.7, err=None, ecolor='#111111',
-         capsize=5, capthick=2, **kwargs):
-    """Plots values as a bar chart
+def bars(y, hspace=0.5, colors=None, **kwargs):
+    """Plots a bar chart.
     
-    Parameters
-    ----------
-    labels : list or iterable of text labels
-    data : list or iterable of numerical values to plot
-    color : color of the bars (default: #444444)
-    width : width of the bars (default: 0.7)
-    err : list or iterable of error bar values (default: None)
-    ecolor : color of the error bars (default: #111111)
+    Args
+    ----
+    y (ndarray) : matrix of bars x series
+    hspace (float) : spacing bete
     """
+
     ax = kwargs['ax']
 
-    n = len(data)
-    x = np.arange(n) + width
-    if err is not None:
-        err = np.vstack((np.zeros_like(err), err))
+    n_x, n_categories = y.shape
+    x_width = (1-hspace)
+    bar_width = x_width/n_categories
 
-    ax.bar(x, data, width, color=color)
+    # compute left alignment for each bar
+    x = []
+    for c in range(n_categories):
+        l = 1 - x_width/2 + c*bar_width
+        x.append([l+i for i in range(n_x)])
+    x = np.array(x).T
 
-    if err is not None:
-        caplines = ax.errorbar(x, data, err, capsize=capsize, capthick=capthick, fmt='.', marker=None, color=ecolor)[1]
-        caplines[0].set_markeredgewidth(0)
+    if colors is None:
+        colors = [plt.cm.Dark2(i) for i in np.linspace(0, 1, n_categories)]
+    elif type(colors) == matplotlib.colors.ListedColormap:
+        colors = [colors(i) for i in np.linspace(0, 1, n_categories)]
 
-    ax.set_xticks(x)
-    ax.set_xticklabels(labels)
+    for c in range(n_categories):
+        ax.bar(x[:,c], y[:,c], color=colors[c], width=bar_width)
+
+    ax.set_xticks(range(1, n_x+1))
+
+    # Setting the x-axis and y-axis limits
+    plt.xlim((0, n_x+1))
+
     tickdir('out', ax=ax)
 
-    return ax
+# @plotwrapper
+# def bars(labels, data, color='#444444', width=0.7, err=None, ecolor='#111111',
+#          capsize=5, capthick=2, **kwargs):
+#     """Plots values as a bar chart
+    
+#     Parameters
+#     ----------
+#     labels : list or iterable of text labels
+#     data : list or iterable of numerical values to plot
+#     color : color of the bars (default: #444444)
+#     width : width of the bars (default: 0.7)
+#     err : list or iterable of error bar values (default: None)
+#     ecolor : color of the error bars (default: #111111)
+#     """
+#     ax = kwargs['ax']
+
+#     n = len(data)
+#     x = np.arange(n) + width
+#     if err is not None:
+#         err = np.vstack((np.zeros_like(err), err))
+
+#     ax.bar(x, data, width, color=color)
+
+#     if err is not None:
+#         caplines = ax.errorbar(x, data, err, capsize=capsize, capthick=capthick, fmt='.', marker=None, color=ecolor)[1]
+#         caplines[0].set_markeredgewidth(0)
+
+#     ax.set_xticks(x)
+#     ax.set_xticklabels(labels)
+#     tickdir('out', ax=ax)
+
+#     return ax
 
 
 @plotwrapper
